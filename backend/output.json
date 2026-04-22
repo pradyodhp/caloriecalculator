@@ -1,0 +1,82 @@
+[
+  {
+    "item": "pizza",
+    "data": {
+      "food": {
+        "description": "PIZZA",
+        "source": "🇺🇸 USDA Database",
+        "cookingMethod": "unknown",
+        "foodType": "general",
+        "nutrients": {
+          "calories": "238 kcal",
+          "sugar": "2.04g ✅",
+          "saturatedFat": "2.38g ✅",
+          "protein": "6.8g ℹ️",
+          "fiber": "1.4g ℹ️",
+          "sodium": "401mg ✅"
+        }
+      },
+      "healthIndex": {
+        "score": "5/10",
+        "rating": "CAUTION",
+        "description": "Limit to once per week",
+        "breakdown": [],
+        "medicalPriority": "YELLOW"
+      },
+      "doctorAdvice": {
+        "warnings": [],
+        "recommendations": []
+      },
+      "alternatives": [
+        "Try reducing oil by 50% in preparation",
+        "Add more vegetables to increase fiber",
+        "Use whole grain alternatives",
+        "Combine with protein to balance blood sugar"
+      ],
+      "medicalVerdict": "🔴 DOCTOR WARNING"
+    }
+  },
+  {
+    "item": "boiled eggs",
+    "data": {
+      "food": {
+        "description": "Boiled Eggs (2 pieces) - Excellent Protein Source",
+        "source": "🏥 Medical Nutrition Database",
+        "cookingMethod": "boiled",
+        "foodType": "lean_protein",
+        "nutrients": {
+          "calories": "155 kcal",
+          "sugar": "1.1g ✅",
+          "saturatedFat": "3.1g ⚠️",
+          "protein": "13g ✅",
+          "fiber": "0g ℹ️",
+          "sodium": "124mg ✅"
+        }
+      },
+      "healthIndex": {
+        "score": "8/10",
+        "rating": "VERY HEALTHY",
+        "description": "Great for metabolic health",
+        "breakdown": [
+          "ℹ️ MODERATE: Some protein",
+          "✅ EXCELLENT: Healthy cooking method - preserves nutrients",
+          "✅ EXCELLENT: Lean protein - ideal for metabolic health",
+          "🎯 CLASSIFIED: Superfood Category",
+          "ℹ️ ADJUSTED: Does not meet exceptional food criteria"
+        ],
+        "medicalPriority": "GREEN"
+      },
+      "doctorAdvice": {
+        "warnings": [],
+        "recommendations": []
+      },
+      "alternatives": [
+        "EXCELLENT CHOICE! Continue including in diet",
+        "Consider portion control for weight management",
+        "Pair with vegetables for added fiber",
+        "This is doctor-recommended for diabetes prevention"
+      ],
+      "medicalVerdict": "🟢 DOCTOR APPROVED"
+    }
+  }
+]
