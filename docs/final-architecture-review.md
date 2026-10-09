@@ -19,7 +19,7 @@ Honest status of the NutriTrack rebuild at the time of writing. Scores are the b
 - **A USDA API key was committed in the original repository history.** It must be revoked at the provider; removing it from code does not remove it from history.
 - **Indian dishes**: IFCT covers raw foods. Idli, dosa and similar are not included. No dish values were invented.
 - **Household servings** (piece, katori) exist only when a user enters the gram weight; they are flagged as estimates.
-- **Not built**: smart alternatives (deferred: a ranking implies a health verdict), calendar view, OpenAPI docs, recipe/custom-food UI, AI-assisted logging (extension point only, by design), observability beyond JSON logs.
+- **Not built**: smart alternatives (deferred: a ranking implies a health verdict), AI-assisted logging (extension point only, by design), observability beyond JSON logs.
 - **Not verified**: GitHub Actions run, Docker image build, behaviour on mobile devices, behaviour under load, USDA live responses (no API key was available; the mapping is unit tested against the documented nutrient numbers only).
 - Targets use standard formulas and are estimates. Floors and macro splits are app defaults, not clinical standards (see `energy-formulas.md`).
 
