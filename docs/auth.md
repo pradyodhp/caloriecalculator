@@ -9,4 +9,4 @@
 - Auth routes are rate limited (30 requests per 15 minutes per IP) on top of the global limit.
 - `requireAuth` takes the user id only from the verified token. Never from the body or URL.
 - Not built yet: password reset and email verification (needs an email sender, deliberately not faked), Google/Apple sign-in. The architecture leaves room: `AuthRepository` is the storage boundary.
-- Storage: tested with an in-memory repository; the Prisma repository is written but not yet run against a live PostgreSQL.
+- Storage: Prisma repository verified against real PostgreSQL; in-memory repository used for unit tests.

@@ -15,7 +15,8 @@
 | Diary engine (user-local dates, day totals, remaining) and recipe nutrition engine | Done: pure logic, 48 tests; HTTP endpoints and DB persistence for diary/recipes not yet wired |
 | Progress (weight trend, goal %), weekly analytics, rule-based explainable insights | Done: pure logic, 54 tests |
 | CI workflow (backend typecheck/test/build/db validate, frontend build) and backend Dockerfile | Done: written, not yet run on GitHub or built with Docker here |
-| Remaining: profile/goals API, diary+recipe+progress endpoints with persistence, frontend rebuild, hardening, final review | Not started |
+| v1 API: profile, goal, targets, diary CRUD, water, weight, progress, weekly analytics + insights, custom foods, recipes | Done and verified end to end against a real PostgreSQL (acceptance flow test; auth too). Migrations 0001-0003 applied live |
+| Remaining: favorites/recents/compare/alternatives, OpenAPI docs, frontend rebuild, security hardening review, final review | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.
 | Foods tab: custom foods, recipe builder, compare, favorites and recents | Done: driven in headless Chrome against live API (custom food + recipe saved) |

@@ -7,6 +7,19 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nutritrack
+          POSTGRES_PASSWORD: nutritrack
+          POSTGRES_DB: nutritrack
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nutritrack"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nutritrack:nutritrack@localhost:5432/nutritrack
     defaults:
       run:
         working-directory: backend
@@ -20,6 +33,7 @@ jobs:
       - run: npm ci
       - run: npm run db:generate
       - run: npm run db:validate
+      - run: npm run db:migrate
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

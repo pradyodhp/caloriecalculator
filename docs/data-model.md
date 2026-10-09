@@ -9,4 +9,4 @@ Defined in `backend/prisma/schema.prisma`; initial SQL in `backend/prisma/migrat
 - **Diary days** are `localDate` (user-local date), separate from timestamps.
 - **Soft delete** (`deletedAt`) on users, foods, meals, entries, recipes.
 - **Indexes**: food canonical name and source, meal (user, date), water (user, date), weight (user, date unique), favorites by user.
-- **Status of verification**: the schema validates (`npm run db:validate`) and the migration SQL was generated from it with `prisma migrate diff`. It has NOT yet been applied to a live PostgreSQL in this build environment (no server available). First live run: `docker compose up -d db`, then `npm run db:migrate`.
+- **Verification**: migrations 0001-0003 were applied to a real PostgreSQL 18 (embedded-postgres) and the acceptance flow test passes against it. Run it yourself: `docker compose up -d db`, `npm run db:migrate`, `DATABASE_URL=... npm test`.
