@@ -14,6 +14,7 @@
 | Auth (register, login, refresh rotation, logout, delete account) | Done: 39 tests with in-memory repo; Prisma repo not live-tested; password reset and OAuth not built |
 | Diary engine (user-local dates, day totals, remaining) and recipe nutrition engine | Done: pure logic, 48 tests; HTTP endpoints and DB persistence for diary/recipes not yet wired |
 | Progress (weight trend, goal %), weekly analytics, rule-based explainable insights | Done: pure logic, 54 tests |
-| Remaining: profile/goals API, diary+recipe+progress endpoints with persistence, frontend, hardening, CI/Docker, final review | Not started |
+| CI workflow (backend typecheck/test/build/db validate, frontend build) and backend Dockerfile | Done: written, not yet run on GitHub or built with Docker here |
+| Remaining: profile/goals API, diary+recipe+progress endpoints with persistence, frontend rebuild, hardening, final review | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.

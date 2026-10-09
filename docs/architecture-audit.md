@@ -59,3 +59,7 @@ Modular monolith, incremental, tests green after each milestone. Milestones are 
 ## 6. What must not be carried forward
 
 Doctor/medical language, the unsourced health score, hardcoded keys, display strings as data, query-text guessing of cooking method.
+
+## Addendum (found during M1-M14)
+
+- `frontend/src/App.test.js` was a copy of `App.js`, not a test, and failed the CRA test run. Removed; real frontend tests arrive with the frontend rebuild.
