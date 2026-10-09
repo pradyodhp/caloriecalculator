@@ -11,12 +11,14 @@
     "test": "NODE_ENV=test tsx --test test/*.test.ts",
     "db:validate": "DATABASE_URL=postgresql://x prisma validate",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy"
+    "db:migrate": "prisma migrate deploy",
+    "data:import-ifct": "tsx scripts/importIfct.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "axios": "^1.13.2",
     "cors": "^2.8.5",
+    "csv-parse": "^7.0.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
