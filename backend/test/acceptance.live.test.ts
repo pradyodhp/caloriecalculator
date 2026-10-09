@@ -111,3 +111,24 @@ test('acceptance flow', { skip: !live }, async () => {
   assert.strictEqual(d.body.entries.length, 2);
   await db.$disconnect();
 });
+
+test('compare, favorites and recents', { skip: !live }, async () => {
+  const db = new PrismaClient();
+  const app = createApp(config, { db, foodSearch: new FoodSearchService([fixture]), auth: new AuthService(new PrismaAuthRepository(db), config.jwtSecret) });
+  const email = `fav-${Date.now()}@example.com`;
+  const reg = await request(app).post('/auth/register').send({ email, password: 'correct-horse-battery' });
+  const A = { authorization: `Bearer ${reg.body.accessToken}` };
+  const rice = (await request(app).get('/foods/search?q=rice').set(A)).body.results[0];
+  const mk = (name: string, kcal: number) => request(app).post('/v1/foods/custom').set(A).send({ name, nutrients: [{ key: 'energy', value: kcal, unit: 'kcal' }], servings: [] });
+  const f1 = (await mk('Food one', 100)).body.foodId;
+  const cmp = await request(app).get(`/v1/foods/compare?a=${rice.foodId}&b=${f1}&grams=200`).set(A);
+  assert.strictEqual(cmp.status, 200);
+  assert.strictEqual(cmp.body.rows[0].a, 260);
+  assert.strictEqual((await request(app).put(`/v1/favorites/${f1}`).set(A)).status, 204);
+  assert.strictEqual((await request(app).get('/v1/favorites').set(A)).body.favorites.length, 1);
+  await request(app).post('/v1/diary/entries').set(A).send({ date: '2026-03-10', meal: 'lunch', foodId: rice.foodId, servingLabel: '100 g', quantity: 1 });
+  assert.strictEqual((await request(app).get('/v1/recents').set(A)).body.recents[0].foodId, rice.foodId);
+  assert.strictEqual((await request(app).delete(`/v1/favorites/${f1}`).set(A)).status, 204);
+  assert.strictEqual((await request(app).get('/v1/favorites').set(A)).body.favorites.length, 0);
+  await db.$disconnect();
+});

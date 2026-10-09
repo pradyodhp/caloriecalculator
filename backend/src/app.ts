@@ -11,6 +11,7 @@ import { FoodStore } from './modules/food/store.js';
 import { userRouter } from './modules/user/routes.js';
 import { diaryRouter } from './modules/diary/routes.js';
 import { progressRouter } from './modules/progress/routes.js';
+import { foodExtrasRouter } from './modules/food/routes.js';
 import { recipeRouter } from './modules/recipe/routes.js';
 import { authRouter, requireAuth } from './modules/auth/routes.js';
 import type { AuthService } from './modules/auth/service.js';
@@ -35,6 +36,7 @@ export function createApp(config: Config, deps: { foodSearch: FoodSearchService;
     v1.use(diaryRouter(deps.db, store));
     v1.use(progressRouter(deps.db));
     v1.use(recipeRouter(deps.db, store));
+    v1.use(foodExtrasRouter(deps.db, store));
     app.use('/v1', v1);
   }
 
