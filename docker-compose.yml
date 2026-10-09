@@ -1,0 +1,14 @@
+# Local development database only. Credentials here are for a local dev container, not production.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: nutritrack
+      POSTGRES_PASSWORD: nutritrack
+      POSTGRES_DB: nutritrack
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+volumes:
+  dbdata:

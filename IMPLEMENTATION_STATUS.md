@@ -7,6 +7,7 @@
 | M2 TypeScript backend skeleton | Done (strict TS, typecheck + build + 6 tests pass) |
 | M3 Unit system and nutrient scaling | Done (11 tests total) |
 | M4 Energy target engine | Done (17 tests total, formulas in docs/energy-formulas.md) |
-| M5 - M18 | Not started |
+| M5 PostgreSQL schema and migration | Done: schema valid, SQL generated; not yet applied to a live DB |
+| M6 - M18 | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.

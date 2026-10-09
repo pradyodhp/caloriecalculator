@@ -1,0 +1,291 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SourceType {
+  usda
+  curated_indian
+  user
+  community
+  demo
+}
+
+enum VerificationStatus {
+  verified_source   // value matches a cited source record
+  unverified        // user/community supplied, not checked
+  demonstration     // sample data, never authoritative
+}
+
+enum MealType {
+  breakfast
+  lunch
+  dinner
+  snack
+}
+
+enum GoalType {
+  lose_weight
+  maintain_weight
+  gain_weight
+  build_muscle
+  improve_protein
+  improve_fiber
+  balanced
+}
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  profile       Profile?
+  goals         Goal[]
+  meals         Meal[]
+  recipes       Recipe[]
+  customFoods   Food[]
+  waterEntries  WaterEntry[]
+  weightEntries WeightEntry[]
+  favoriteFoods FavoriteFood[]
+  favoriteMeals FavoriteMeal[]
+  insights      Insight[]
+  preferences   UserPreference?
+}
+
+model Profile {
+  userId        String    @id @db.Uuid
+  name          String?
+  dateOfBirth   DateTime? @db.Date
+  biologicalSex String?
+  heightCm      Decimal?  @db.Decimal(5, 1)
+  activityLevel String?
+  country       String?
+  timezone      String    @default("UTC")
+  dietaryPreferences  String[]
+  dietaryRestrictions String[]
+  allergies           String[]
+  cuisinePreferences  String[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserPreference {
+  userId       String @id @db.Uuid
+  weightUnit   String @default("kg")
+  heightUnit   String @default("cm")
+  energyUnit   String @default("kcal")
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @db.Uuid
+  type       GoalType
+  targetValue  Decimal? @db.Decimal(8, 2)
+  startValue   Decimal? @db.Decimal(8, 2)
+  targetDate   DateTime? @db.Date
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, active])
+}
+
+// Every food row carries provenance. sourceType + sourceId is unique per source record.
+model Food {
+  id                 String             @id @default(uuid()) @db.Uuid
+  canonicalName      String
+  displayName        String
+  description        String?
+  foodType           String?
+  cuisine            String?
+  sourceType         SourceType
+  source             String
+  sourceId           String?
+  sourceVersion      String?
+  verificationStatus VerificationStatus
+  retrievedAt        DateTime?
+  ownerUserId        String?            @db.Uuid // set for user-created foods only
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  owner       User?          @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  nutrients   FoodNutrient[]
+  servings    Serving[]
+  mealEntries MealEntry[]
+  ingredients RecipeIngredient[]
+  favorites   FavoriteFood[]
+
+  @@unique([sourceType, sourceId])
+  @@index([canonicalName])
+  @@index([sourceType])
+  @@index([ownerUserId])
+}
+
+// Nutrient values are stored per 100 g with an explicit unit. Never unitless.
+model FoodNutrient {
+  id        String  @id @default(uuid()) @db.Uuid
+  foodId    String  @db.Uuid
+  nutrient  String
+  amount    Decimal @db.Decimal(12, 4)
+  unit      String
+  basis     String  @default("per 100 g")
+
+  food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@unique([foodId, nutrient])
+}
+
+// A named serving for a food (e.g. "1 idli", "1 katori") with its gram weight.
+model Serving {
+  id            String  @id @default(uuid()) @db.Uuid
+  foodId        String  @db.Uuid
+  label         String
+  gramWeight    Decimal @db.Decimal(10, 2)
+  isDefault     Boolean @default(false)
+  sourceNote    String?   // where the gram weight came from
+  isEstimate    Boolean @default(true)
+
+  food        Food        @relation(fields: [foodId], references: [id], onDelete: Cascade)
+  mealEntries MealEntry[]
+
+  @@unique([foodId, label])
+}
+
+model Meal {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  localDate DateTime  @db.Date // user-local diary day
+  mealType  MealType
+  loggedAt  DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  entries MealEntry[]
+
+  @@index([userId, localDate])
+}
+
+model MealEntry {
+  id         String    @id @default(uuid()) @db.Uuid
+  mealId     String    @db.Uuid
+  foodId     String    @db.Uuid
+  servingId  String?   @db.Uuid
+  quantity   Decimal   @db.Decimal(10, 3)
+  gramsTotal Decimal   @db.Decimal(10, 2)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  meal    Meal     @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  food    Food     @relation(fields: [foodId], references: [id])
+  serving Serving? @relation(fields: [servingId], references: [id])
+
+  @@index([mealId])
+}
+
+model Recipe {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  name      String
+  servings  Decimal   @db.Decimal(6, 2)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredients RecipeIngredient[]
+
+  @@index([userId])
+}
+
+model RecipeIngredient {
+  id       String  @id @default(uuid()) @db.Uuid
+  recipeId String  @db.Uuid
+  foodId   String  @db.Uuid
+  grams    Decimal @db.Decimal(10, 2)
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  food   Food   @relation(fields: [foodId], references: [id])
+
+  @@index([recipeId])
+}
+
+model WaterEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  localDate DateTime @db.Date
+  amountMl  Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, localDate])
+}
+
+model WeightEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  localDate DateTime @db.Date
+  weightKg  Decimal  @db.Decimal(5, 2)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, localDate])
+}
+
+model FavoriteFood {
+  userId    String   @db.Uuid
+  foodId    String   @db.Uuid
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  food Food @relation(fields: [foodId], references: [id], onDelete: Cascade)
+
+  @@id([userId, foodId])
+  @@index([userId])
+}
+
+model FavoriteMeal {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  name      String
+  payload   Json     // list of { foodId, servingId, quantity }
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Insights are derived, rule-based and cite the rule that produced them.
+model Insight {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  localDate DateTime @db.Date
+  ruleId    String
+  message   String
+  evidence  Json
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, localDate])
+}
