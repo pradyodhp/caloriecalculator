@@ -11,17 +11,9 @@ import {
   Chip,
   Grid,
   Alert,
-  CircularProgress,
-  Tabs,
-  Tab
+  CircularProgress
 } from '@mui/material';
-import {
-  Restaurant,
-  Favorite,
-  Warning,
-  LocalDining,
-  TrendingUp
-} from '@mui/icons-material';
+import { Restaurant } from '@mui/icons-material';
 import axios from 'axios';
 import './App.css';
 
@@ -30,8 +22,7 @@ function App() {
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState(0);
-
+  
   const API_BASE_URL = 'http://localhost:3001';
 
   const searchFood = async () => {
@@ -48,16 +39,9 @@ function App() {
       const response = await axios.get(`${API_BASE_URL}/nutrition/${encodeURIComponent(foodInput)}`);
       setResults(response.data);
     } catch (err) {
-      setError('Food not found. Try: samosa, idli, pizza, dal, etc.');
+      setError('Food not found, or the data provider is unavailable.');
     }
     setLoading(false);
-  };
-
-  const getScoreColor = (score) => {
-    const scoreNum = parseInt(score);
-    if (scoreNum >= 8) return '#4caf50';
-    if (scoreNum >= 6) return '#ff9800';
-    return '#f44336';
   };
 
   const handleKeyPress = (e) => {
@@ -81,7 +65,7 @@ function App() {
           Nutrition Advisor
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Get detailed nutritional analysis and healthier alternatives for Indian foods
+          Look up nutrition data for foods, with the source shown
         </Typography>
       </Box>
 
@@ -128,129 +112,28 @@ function App() {
                 </Typography>
                 <Box display="flex" gap={1} flexWrap="wrap">
                   <Chip label={results.food.source} variant="outlined" size="small" />
-                  <Chip label="Standard portion" color="primary" size="small" />
-                  <Chip 
-                    label={results.food.source.includes("Mess") ? "Indian Food" : "USDA Food"} 
-                    variant="outlined" 
-                    size="small" 
-                  />
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Box textAlign="center">
-                  <Typography 
-                    variant="h3" 
-                    sx={{ color: getScoreColor(results.healthIndex.score) }}
-                  >
-                    {results.healthIndex.score}
-                  </Typography>
-                  <Typography variant="h6" color="text.secondary">
-                    Health Score
-                  </Typography>
-                  <Chip 
-                    label={results.healthIndex.rating} 
-                    color={
-                      parseInt(results.healthIndex.score) >= 7 ? 'success' : 
-                      parseInt(results.healthIndex.score) >= 5 ? 'warning' : 'error'
-                    }
-                  />
                 </Box>
               </Grid>
             </Grid>
           </Box>
 
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={activeTab} onChange={(e, newValue) => setActiveTab(newValue)}>
-              <Tab label="Nutrition Facts" />
-              <Tab label="Health Analysis" />
-              <Tab label="Alternatives" />
-            </Tabs>
-          </Box>
-
           <Box sx={{ p: 3 }}>
-            {activeTab === 0 && (
-              <Grid container spacing={3}>
-                {Object.entries(results.food.nutrients).map(([key, value]) => (
-                  <Grid item xs={6} sm={4} md={2} key={key}>
-                    <Card variant="outlined">
-                      <CardContent sx={{ textAlign: 'center' }}>
-                        <Typography variant="h6" color="primary">
-                          {value}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            )}
-
-            {activeTab === 1 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  {results.healthIndex.description}
-                </Typography>
-                
-                {results.healthIndex.breakdown && results.healthIndex.breakdown.length > 0 && (
-                  <Alert severity="warning" sx={{ mb: 2 }}>
-                    <Box>
-                      <Typography variant="subtitle1" gutterBottom>
-                        <Warning sx={{ verticalAlign: 'bottom', mr: 1 }} />
-                        Health Analysis
-                      </Typography>
-                      <ul style={{ margin: 0, paddingLeft: 20 }}>
-                        {results.healthIndex.breakdown.map((item, index) => (
-                          <li key={index}>{item}</li>
-                        ))}
-                      </ul>
-                    </Box>
-                  </Alert>
-                )}
-
-                <Box 
-                  sx={{ 
-                    mt: 3, 
-                    p: 2, 
-                    borderRadius: 1,
-                    bgcolor: results.recommendation.includes('GOOD') ? 
-                      '#e8f5e8' : results.recommendation.includes('MODERATE') ? 
-                      '#fff3e0' : '#ffebee'
-                  }}
-                >
-                  <Typography variant="h6" gutterBottom>
-                    <TrendingUp sx={{ verticalAlign: 'bottom', mr: 1 }} />
-                    Recommendation
-                  </Typography>
-                  <Typography variant="body1">
-                    {results.recommendation}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-
-            {activeTab === 2 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  <LocalDining sx={{ verticalAlign: 'bottom', mr: 1 }} />
-                  Healthier Alternatives
-                </Typography>
-                <Grid container spacing={2}>
-                  {results.alternatives.map((alternative, index) => (
-                    <Grid item xs={12} md={6} key={index}>
-                      <Card variant="outlined" sx={{ height: '100%' }}>
-                        <CardContent>
-                          <Typography variant="body1" color="primary">
-                            {alternative}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Values {results.food.basis}. Source: {results.food.source} (ID {results.food.sourceId}).
+              General nutrition information, not medical advice.
+            </Typography>
+            <Grid container spacing={3}>
+              {results.food.nutrients.map((n) => (
+                <Grid item xs={6} sm={4} md={3} key={n.key}>
+                  <Card variant="outlined">
+                    <CardContent sx={{ textAlign: 'center' }}>
+                      <Typography variant="h6" color="primary">{n.value} {n.unit}</Typography>
+                      <Typography variant="body2" color="text.secondary">{n.key}</Typography>
+                    </CardContent>
+                  </Card>
                 </Grid>
-              </Box>
-            )}
+              ))}
+            </Grid>
           </Box>
         </Paper>
       )}
