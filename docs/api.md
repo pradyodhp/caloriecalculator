@@ -19,7 +19,6 @@ All `/v1` routes need `Authorization: Bearer <access token>`. The user id always
 | POST/GET/DELETE /v1/recipes | Recipes; also creates a loggable food. Nutrients missing from any ingredient are left out and listed as `omittedIncompleteNutrients` |
 | GET /v1/foods/compare?a=&b=&grams= | Same-weight numbers for two foods, no verdict |
 | GET/PUT/DELETE /v1/favorites[/:foodId], GET /v1/recents | Favorites and recently logged foods |
-
 | POST /v1/diary/copy | Copy one meal or a whole day to another day (`fromDate`, `toDate`, optional `fromMeal`, `toMeal`) |
 | GET /v1/diary/calendar?month=YYYY-MM | Per-day energy and entry count; unlogged days are omitted, not zero |
 
