@@ -93,6 +93,7 @@ model Goal {
   id         String    @id @default(uuid()) @db.Uuid
   userId     String    @db.Uuid
   type       GoalType
+  pace       String    @default("standard")
   targetValue  Decimal? @db.Decimal(8, 2)
   startValue   Decimal? @db.Decimal(8, 2)
   targetDate   DateTime? @db.Date
