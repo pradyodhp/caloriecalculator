@@ -20,3 +20,4 @@
 Known: a USDA key was committed in earlier history and must be rotated by the owner.
 | Foods tab: custom foods, recipe builder, compare, favorites and recents | Done: driven in headless Chrome against live API (custom food + recipe saved) |
 | OpenAPI summary (docs/openapi.yaml) with route-drift test | Done: schemas are summaries, zod is authoritative |
+| Copy meal/day (API + "Copy yesterday" button), month calendar (API + History tab), day navigation | Done: 60 tests with live DB; driven in headless Chrome |

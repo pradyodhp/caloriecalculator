@@ -132,3 +132,30 @@ test('compare, favorites and recents', { skip: !live }, async () => {
   assert.strictEqual((await request(app).get('/v1/favorites').set(A)).body.favorites.length, 0);
   await db.$disconnect();
 });
+
+test('copy meal and month calendar', { skip: !live }, async () => {
+  const db = new PrismaClient();
+  const app = createApp(config, { db, foodSearch: new FoodSearchService([fixture]), auth: new AuthService(new PrismaAuthRepository(db), config.jwtSecret) });
+  const reg = await request(app).post('/auth/register').send({ email: `cp-${Date.now()}@example.com`, password: 'correct-horse-battery' });
+  const A = { authorization: `Bearer ${reg.body.accessToken}` };
+  const rice = (await request(app).get('/foods/search?q=rice').set(A)).body.results[0];
+  await request(app).post('/v1/diary/entries').set(A).send({ date: '2026-03-10', meal: 'lunch', foodId: rice.foodId, servingLabel: '100 g', quantity: 2 });
+  await request(app).post('/v1/diary/entries').set(A).send({ date: '2026-03-10', meal: 'dinner', foodId: rice.foodId, servingLabel: '100 g', quantity: 1 });
+  // one meal to another day and meal
+  const c1 = await request(app).post('/v1/diary/copy').set(A).send({ fromDate: '2026-03-10', fromMeal: 'lunch', toDate: '2026-03-11', toMeal: 'dinner' });
+  assert.strictEqual(c1.body.copied, 1);
+  // whole day
+  assert.strictEqual((await request(app).post('/v1/diary/copy').set(A).send({ fromDate: '2026-03-10', toDate: '2026-03-12' })).body.copied, 2);
+  assert.strictEqual((await request(app).post('/v1/diary/copy').set(A).send({ fromDate: '2026-03-10', toDate: '2026-03-12', toMeal: 'snack' })).status, 400);
+  const d = await request(app).get('/v1/diary?date=2026-03-11').set(A);
+  assert.strictEqual(d.body.entries.length, 1);
+  assert.strictEqual(d.body.entries[0].meal, 'dinner');
+  assert.strictEqual(d.body.entries[0].grams, 200);
+  const cal = await request(app).get('/v1/diary/calendar?month=2026-03').set(A);
+  assert.deepStrictEqual(cal.body.days.map((x: { date: string; kcal: number }) => [x.date, x.kcal]), [['2026-03-10', 390], ['2026-03-11', 260], ['2026-03-12', 390]]);
+  assert.strictEqual((await request(app).get('/v1/diary/calendar?month=2026-13').set(A)).status, 400);
+  // another user cannot see these days
+  const other = await request(app).post('/auth/register').send({ email: `cp2-${Date.now()}@example.com`, password: 'correct-horse-battery' });
+  assert.deepStrictEqual((await request(app).get('/v1/diary/calendar?month=2026-03').set({ authorization: `Bearer ${other.body.accessToken}` })).body.days, []);
+  await db.$disconnect();
+});

@@ -17,14 +17,18 @@ function MacroBar({ label, consumed, target, unit }) {
   );
 }
 
-export default function Dashboard() {
+function shiftDate(d, n) { const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); }
+
+export default function Dashboard({ initialDate, onDateChange }) {
+  const [date, setDate] = useState(initialDate || null);
   const [day, setDay] = useState(null);
   const [error, setError] = useState('');
   const [adding, setAdding] = useState(null); // meal name
+  const [note, setNote] = useState('');
 
   const load = useCallback(async () => {
-    try { setDay(await api.diary()); setError(''); } catch (e) { setError(e.message); }
-  }, []);
+    try { const d = await api.diary(date || undefined); setDay(d); if (!date) setDate(d.date); setError(''); } catch (e) { setError(e.message); }
+  }, [date]);
   useEffect(() => { load(); }, [load]);
 
   if (error) return <div className="state" role="alert">{error} <button className="link" onClick={load}>Retry</button></div>;
@@ -34,11 +38,19 @@ export default function Dashboard() {
   const kcal = nutrient(day.totals.nutrients, 'energy');
 
   async function remove(id) { await api.deleteEntry(id); load(); }
+  function go(d) { setDay(null); setDate(d); if (onDateChange) onDateChange(d); }
+  async function copyFrom(meal) {
+    try { const r = await api.copyDiary({ fromDate: shiftDate(day.date, -1), toDate: day.date, fromMeal: meal }); setNote(r.copied ? `Copied ${r.copied} item(s) from yesterday's ${meal}.` : `Nothing logged for ${meal} yesterday.`); load(); }
+    catch (e) { setNote(e.message); }
+  }
   async function water(ml) { await api.addWater(ml, day.date); load(); }
 
   return (
     <section className="fade-in">
-      <p className="eyebrow">{day.date}</p>
+      <p className="eyebrow">
+        <button className="link" onClick={() => go(shiftDate(day.date, -1))} aria-label="Previous day">&lsaquo;</button> {day.date} <button className="link" onClick={() => go(shiftDate(day.date, 1))} aria-label="Next day">&rsaquo;</button>
+      </p>
+      {note && <p className="muted small" role="status">{note}</p>}
       {t ? (
         <>
           <h1>{kcal <= t.kcal ? `${fmt(t.kcal - kcal)} kcal left today` : `${fmt(kcal - t.kcal)} kcal over today's estimate`}</h1>
@@ -83,7 +95,7 @@ export default function Dashboard() {
                 </li>
               ))}
             </ul>
-            <button className="chip" onClick={() => setAdding(m)}>Add food</button>
+            <button className="chip" onClick={() => setAdding(m)}>Add food</button> <button className="chip" onClick={() => copyFrom(m)}>Copy yesterday</button>
           </details>
         );
       })}

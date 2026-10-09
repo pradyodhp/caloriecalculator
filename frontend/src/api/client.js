@@ -79,5 +79,7 @@ export const api = {
   favorites: () => request('/v1/favorites'),
   addFavorite: (id) => request(`/v1/favorites/${id}`, { method: 'PUT' }),
   removeFavorite: (id) => request(`/v1/favorites/${id}`, { method: 'DELETE' }),
+  copyDiary: (b) => request('/v1/diary/copy', { method: 'POST', body: b }),
+  calendar: (month) => request(`/v1/diary/calendar?month=${month}`),
   recents: () => request('/v1/recents'),
 };

@@ -148,5 +148,57 @@ export function diaryRouter(db: PrismaClient, foods: FoodStore): Router {
     res.status(201).json({ date });
   }));
 
+  // Copy logged entries (one meal, or the whole day) to another day/meal. Grams and serving are copied as logged.
+  const copyBody = z.object({
+    fromDate: localDateSchema, toDate: localDateSchema,
+    fromMeal: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+    toMeal: z.enum(['breakfast', 'lunch', 'dinner', 'snack']).optional(),
+  });
+  r.post('/diary/copy', asyncRoute(async (req, res) => {
+    const userId = req.userId!;
+    const b = parse(copyBody, req.body);
+    if (b.toMeal && !b.fromMeal) throw new ValidationError('toMeal needs fromMeal; omit both to copy the whole day');
+    const src = await db.meal.findMany({
+      where: { userId, localDate: day(b.fromDate), deletedAt: null, ...(b.fromMeal ? { mealType: b.fromMeal } : {}) },
+      include: { entries: { where: { deletedAt: null } } },
+    });
+    let copied = 0;
+    for (const m of src) {
+      if (m.entries.length === 0) continue;
+      const mealType = b.toMeal ?? m.mealType;
+      const existing = await db.meal.findFirst({ where: { userId, localDate: day(b.toDate), mealType, deletedAt: null } });
+      const target = existing ?? (await db.meal.create({ data: { userId, localDate: day(b.toDate), mealType } }));
+      for (const e of m.entries) {
+        await db.mealEntry.create({ data: { mealId: target.id, foodId: e.foodId, servingId: e.servingId, quantity: e.quantity, gramsTotal: e.gramsTotal } });
+        copied += 1;
+      }
+    }
+    res.status(201).json({ copied });
+  }));
+
+  // Month overview: energy and entry count per logged day. Days with no entries are omitted, not shown as zero.
+  r.get('/diary/calendar', asyncRoute(async (req, res) => {
+    const userId = req.userId!;
+    const month = parse(z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'must be YYYY-MM'), req.query.month);
+    const start = new Date(`${month}-01T00:00:00Z`);
+    const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 1));
+    const meals = await db.meal.findMany({
+      where: { userId, deletedAt: null, localDate: { gte: start, lt: end } },
+      include: { entries: { where: { deletedAt: null }, include: { food: { include: { nutrients: true } } } } },
+    });
+    const days = new Map<string, { kcal: number; entries: number; missingEnergy: number }>();
+    for (const m of meals) {
+      const key = m.localDate.toISOString().slice(0, 10);
+      const d = days.get(key) ?? { kcal: 0, entries: 0, missingEnergy: 0 };
+      for (const e of m.entries) {
+        const en = e.food.nutrients.find((n) => n.nutrient === 'energy');
+        d.entries += 1;
+        if (en) d.kcal += (Number(en.amount) * Number(e.gramsTotal)) / 100; else d.missingEnergy += 1;
+      }
+      days.set(key, d);
+    }
+    res.json({ month, days: [...days.entries()].filter(([, d]) => d.entries > 0).sort(([a], [b]) => a.localeCompare(b)).map(([date, d]) => ({ date, kcal: Math.round(d.kcal), entries: d.entries, entriesWithoutEnergy: d.missingEnergy })) });
+  }));
+
   return r;
 }
