@@ -16,7 +16,7 @@ Every food value shows its source, basis (e.g. per 100 g) and unit. NutriTrack g
 
 ```
 cd backend && cp .env.example .env   # add a free USDA key
-npm install && npm test && npm start
+npm install && npm test && npm run build && npm start
 cd ../frontend && npm install && npm start
 ```
 
