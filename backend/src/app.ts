@@ -6,11 +6,17 @@ import rateLimit from 'express-rate-limit';
 import type { Config } from './config/env.js';
 import { errorHandler } from './http/errorHandler.js';
 import { ExternalProviderError, NotFoundError, ValidationError } from './shared/errors.js';
-import { authRouter } from './modules/auth/routes.js';
+import type { PrismaClient } from '@prisma/client';
+import { FoodStore } from './modules/food/store.js';
+import { userRouter } from './modules/user/routes.js';
+import { diaryRouter } from './modules/diary/routes.js';
+import { progressRouter } from './modules/progress/routes.js';
+import { recipeRouter } from './modules/recipe/routes.js';
+import { authRouter, requireAuth } from './modules/auth/routes.js';
 import type { AuthService } from './modules/auth/service.js';
 import type { FoodSearchService } from './modules/food/searchService.js';
 
-export function createApp(config: Config, deps: { foodSearch: FoodSearchService; auth: AuthService }) {
+export function createApp(config: Config, deps: { foodSearch: FoodSearchService; auth: AuthService; db?: PrismaClient }) {
   const app = express();
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigins }));
@@ -20,6 +26,17 @@ export function createApp(config: Config, deps: { foodSearch: FoodSearchService;
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
   app.use('/auth', authRouter(deps.auth));
+
+  const store = deps.db ? new FoodStore(deps.db) : undefined;
+  if (deps.db && store) {
+    const v1 = express.Router();
+    v1.use(requireAuth(deps.auth));
+    v1.use(userRouter(deps.db));
+    v1.use(diaryRouter(deps.db, store));
+    v1.use(progressRouter(deps.db));
+    v1.use(recipeRouter(deps.db, store));
+    app.use('/v1', v1);
+  }
 
   const query = z.object({
     q: z.string().trim().min(1).max(100),
@@ -32,7 +49,10 @@ export function createApp(config: Config, deps: { foodSearch: FoodSearchService;
       if (!parsed.success) throw new ValidationError('q is required (1-100 chars); limit is 1-25');
       const { results, providerErrors } = await deps.foodSearch.search(parsed.data.q, parsed.data.limit);
       if (results.length === 0 && providerErrors.length > 0) throw new ExternalProviderError();
-      res.json({ query: parsed.data.q, count: results.length, results, providerErrors });
+      const withIds = store
+        ? await Promise.all(results.map(async (rec) => ({ foodId: (await store.upsertFromRecord(rec)).id, ...rec })))
+        : results;
+      res.json({ query: parsed.data.q, count: withIds.length, results: withIds, providerErrors });
     } catch (e) {
       next(e);
     }
