@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import request from 'supertest';
+import { AuthService } from '../src/modules/auth/service.js';
+import { InMemoryAuthRepository } from '../src/modules/auth/repository.js';
 import { createApp } from '../src/app.js';
 import { loadConfig } from '../src/config/env.js';
 import { extractNutrients, UsdaProvider } from '../src/modules/food/providers/usda.js';
@@ -16,7 +18,7 @@ const mk = (name: string, items: string[], fail = false): FoodProvider => ({
   name,
   search: async () => { if (fail) throw new Error('down'); return items.map((i) => rec(i)); },
 });
-const appWith = (...ps: FoodProvider[]) => createApp(config, { foodSearch: new FoodSearchService(ps) });
+const appWith = (...ps: FoodProvider[]) => createApp(config, { foodSearch: new FoodSearchService(ps), auth: new AuthService(new InMemoryAuthRepository(), config.jwtSecret) });
 const stub = mk('stub', ['X']);
 
 test('extractNutrients maps USDA numbers to unit-labelled values', () => {

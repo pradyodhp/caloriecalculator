@@ -6,9 +6,11 @@ import rateLimit from 'express-rate-limit';
 import type { Config } from './config/env.js';
 import { errorHandler } from './http/errorHandler.js';
 import { ExternalProviderError, NotFoundError, ValidationError } from './shared/errors.js';
+import { authRouter } from './modules/auth/routes.js';
+import type { AuthService } from './modules/auth/service.js';
 import type { FoodSearchService } from './modules/food/searchService.js';
 
-export function createApp(config: Config, deps: { foodSearch: FoodSearchService }) {
+export function createApp(config: Config, deps: { foodSearch: FoodSearchService; auth: AuthService }) {
   const app = express();
   app.use(helmet());
   app.use(cors({ origin: config.corsOrigins }));
@@ -16,6 +18,8 @@ export function createApp(config: Config, deps: { foodSearch: FoodSearchService 
   app.use(express.json({ limit: '100kb' }));
 
   app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+  app.use('/auth', authRouter(deps.auth));
 
   const query = z.object({
     q: z.string().trim().min(1).max(100),

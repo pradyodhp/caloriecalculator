@@ -57,6 +57,7 @@ model User {
   favoriteMeals FavoriteMeal[]
   insights      Insight[]
   preferences   UserPreference?
+  refreshTokens RefreshToken[]
 }
 
 model Profile {
@@ -288,4 +289,18 @@ model Insight {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, localDate])
+}
+
+// Refresh tokens are stored only as SHA-256 hashes. Rotated on every use.
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
