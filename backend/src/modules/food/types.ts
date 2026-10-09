@@ -19,5 +19,6 @@ export interface FoodRecord {
 
 export interface FoodProvider {
   readonly sourceType: SourceType;
-  search(query: string): Promise<FoodRecord | null>;
+  readonly name: string;
+  search(query: string, limit: number): Promise<FoodRecord[]>;
 }

@@ -34,40 +34,39 @@ export function extractNutrients(food: Pick<UsdaFood, 'foodNutrients'>): Nutrien
 
 export class UsdaProvider implements FoodProvider {
   readonly sourceType = 'usda' as const;
+  readonly name = 'USDA FoodData Central';
   private cache = new NodeCache({ stdTTL: 3600 });
 
   constructor(private apiKey: string) {}
 
-  async search(query: string): Promise<FoodRecord | null> {
+  async search(query: string, limit: number): Promise<FoodRecord[]> {
     if (!this.apiKey) throw new ExternalProviderError('USDA_API_KEY is not configured');
-    const key = query.toLowerCase().trim();
-    const cached = this.cache.get<FoodRecord | null>(key);
-    if (cached !== undefined) return cached;
+    const key = `${query.toLowerCase().trim()}|${limit}`;
+    const cached = this.cache.get<FoodRecord[]>(key);
+    if (cached) return cached;
 
     let foods: UsdaFood[];
     try {
       const res = await axios.get<{ foods?: UsdaFood[] }>(URL, {
-        params: { query, api_key: this.apiKey, pageSize: 1 },
+        params: { query, api_key: this.apiKey, pageSize: limit },
         timeout: 10000,
       });
       foods = res.data.foods ?? [];
     } catch {
       throw new ExternalProviderError();
     }
-    const f = foods[0];
-    const record: FoodRecord | null = f
-      ? {
-          description: f.description,
-          sourceType: 'usda',
-          source: 'USDA FoodData Central',
-          sourceId: String(f.fdcId),
-          dataType: f.dataType,
-          retrievedAt: new Date().toISOString(),
-          basis: 'per 100 g',
-          nutrients: extractNutrients(f),
-        }
-      : null;
-    this.cache.set(key, record);
-    return record;
+    const retrievedAt = new Date().toISOString();
+    const records: FoodRecord[] = foods.map((f) => ({
+      description: f.description,
+      sourceType: 'usda',
+      source: 'USDA FoodData Central',
+      sourceId: String(f.fdcId),
+      dataType: f.dataType,
+      retrievedAt,
+      basis: 'per 100 g',
+      nutrients: extractNutrients(f),
+    }));
+    this.cache.set(key, records);
+    return records;
   }
 }
