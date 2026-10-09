@@ -62,4 +62,4 @@ Doctor/medical language, the unsourced health score, hardcoded keys, display str
 
 ## Addendum (found during M1-M14)
 
-- `frontend/src/App.test.js` was a copy of `App.js`, not a test, and failed the CRA test run. Removed; real frontend tests arrive with the frontend rebuild.
+- `frontend/src/App.test.js` contained a copy of the app component (not a test) and failed the CRA test run. Removed; real frontend tests arrive with the frontend rebuild.
