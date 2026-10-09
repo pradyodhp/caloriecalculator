@@ -5,6 +5,8 @@
 | M0 Audit and roadmap | Done |
 | M1 Hygiene, secrets, honest legacy lookup | Done (backend tests: 4 passing; frontend patched to the new response shape) |
 | M2 TypeScript backend skeleton | Done (strict TS, typecheck + build + 6 tests pass) |
-| M3 - M18 | Not started |
+| M3 Unit system and nutrient scaling | Done (11 tests total) |
+| M4 Energy target engine | Done (17 tests total, formulas in docs/energy-formulas.md) |
+| M5 - M18 | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.
