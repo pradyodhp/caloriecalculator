@@ -1,0 +1,173 @@
+openapi: 3.0.3
+info:
+  title: NutriTrack API
+  version: 1.0.0
+  description: Summary of routes. Schemas are summarized; the zod schemas in backend/src are authoritative. Nutrition values always carry source, source ID, basis and units.
+components:
+  securitySchemes:
+    bearer: { type: http, scheme: bearer, bearerFormat: JWT }
+paths:
+  /health:
+    get:
+      summary: Liveness
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /foods/search:
+    get:
+      summary: Ranked food search across providers
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/register:
+    post:
+      summary: Create account, returns tokens
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/login:
+    post:
+      summary: Log in, returns tokens
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/refresh:
+    post:
+      summary: Rotate refresh token
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/logout:
+    post:
+      summary: Revoke refresh token
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/me:
+    get:
+      summary: Current user id
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /auth/account:
+    delete:
+      summary: Delete account and data
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/diary:
+    get:
+      summary: One user-local day
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/diary/entries:
+    post:
+      summary: Log a food
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/diary/entries/{id}:
+    patch:
+      summary: Edit an entry
+      security: [{ bearer: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    delete:
+      summary: Soft-delete an entry
+      security: [{ bearer: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/diary/copy:
+    post:
+      summary: Copy a meal or a whole day to another day
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/diary/calendar:
+    get:
+      summary: Month overview of logged days (energy and entry count)
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/water:
+    post:
+      summary: Add water
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/weight:
+    post:
+      summary: Add weight
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/profile:
+    get:
+      summary: Get profile
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    put:
+      summary: Save profile
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/goal:
+    get:
+      summary: Get goal
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    put:
+      summary: Save goal
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/targets:
+    get:
+      summary: Estimated targets
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/foods/compare:
+    get:
+      summary: Same-weight comparison, no verdict
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/favorites:
+    get:
+      summary: List favorites
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/favorites/{foodId}:
+    put:
+      summary: Add favorite
+      security: [{ bearer: [] }]
+      parameters: [{ name: foodId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    delete:
+      summary: Remove favorite
+      security: [{ bearer: [] }]
+      parameters: [{ name: foodId, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/recents:
+    get:
+      summary: Recently logged foods
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/progress/weight:
+    get:
+      summary: Weight series and trend
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/analytics/weekly:
+    get:
+      summary: 7-day analytics and evidence-backed insights
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/foods/custom:
+    post:
+      summary: Create custom food
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    get:
+      summary: List custom foods
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/foods/custom/{id}:
+    delete:
+      summary: Delete custom food
+      security: [{ bearer: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/recipes:
+    post:
+      summary: Create recipe
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+    get:
+      summary: List recipes
+      security: [{ bearer: [] }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }
+  /v1/recipes/{id}:
+    delete:
+      summary: Delete recipe
+      security: [{ bearer: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: OK }, '400': { description: Validation error }, '401': { description: Unauthorized } }

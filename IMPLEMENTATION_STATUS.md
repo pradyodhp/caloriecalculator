@@ -16,9 +16,10 @@
 | Progress (weight trend, goal %), weekly analytics, rule-based explainable insights | Done: pure logic, 54 tests |
 | CI workflow (backend typecheck/test/build/db validate, frontend build) and backend Dockerfile | Done: written, not yet run on GitHub or built with Docker here |
 | v1 API: profile, goal, targets, diary CRUD, water, weight, progress, weekly analytics + insights, custom foods, recipes | Done and verified end to end against a real PostgreSQL (acceptance flow test; auth too). Migrations 0001-0003 applied live |
-| Remaining: favorites/recents/compare/alternatives, OpenAPI docs, frontend rebuild, security hardening review, final review | Not started |
+| Remaining: favorites/recents/compare/alternatives, frontend rebuild, security hardening review, final review | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.
 | Foods tab: custom foods, recipe builder, compare, favorites and recents | Done: driven in headless Chrome against live API (custom food + recipe saved) |
 | OpenAPI summary (docs/openapi.yaml) with route-drift test | Done: schemas are summaries, zod is authoritative |
 | Copy meal/day (API + "Copy yesterday" button), month calendar (API + History tab), day navigation | Done: 60 tests with live DB; driven in headless Chrome |
+| OpenAPI summary (docs/openapi.yaml) with route-drift test | Done: schemas are summaries, zod is authoritative |
