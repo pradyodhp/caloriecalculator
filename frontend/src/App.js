@@ -4,6 +4,7 @@ import AuthPage from './components/AuthPage';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import Progress from './components/Progress';
+import Foods from './components/Foods';
 
 export default function App() {
   const [phase, setPhase] = useState('loading'); // loading | auth | onboarding | app
@@ -31,13 +32,13 @@ export default function App() {
       <header className="top">
         <strong>NutriTrack</strong>
         <nav aria-label="Main">
-          {[['today', 'Today'], ['progress', 'Progress']].map(([k, l]) => (
+          {[['today', 'Today'], ['foods', 'Foods'], ['progress', 'Progress']].map(([k, l]) => (
             <button key={k} className={tab === k ? 'active' : ''} aria-current={tab === k ? 'page' : undefined} onClick={() => setTab(k)}>{l}</button>
           ))}
           <button onClick={async () => { await auth.logout(); setPhase('auth'); }}>Log out</button>
         </nav>
       </header>
-      <main>{tab === 'today' ? <Dashboard /> : <Progress />}</main>
+      <main>{tab === 'today' ? <Dashboard /> : tab === 'foods' ? <Foods /> : <Progress />}</main>
       <footer className="foot">General nutrition information, not medical advice. Targets are estimates.</footer>
     </>
   );

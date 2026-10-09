@@ -18,3 +18,4 @@
 | Remaining: profile/goals API, diary+recipe+progress endpoints with persistence, frontend rebuild, hardening, final review | Not started |
 
 Known: a USDA key was committed in earlier history and must be rotated by the owner.
+| Foods tab: custom foods, recipe builder, compare, favorites and recents | Done: driven in headless Chrome against live API (custom food + recipe saved) |
